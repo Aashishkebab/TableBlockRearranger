@@ -3,11 +3,19 @@
 
 // ReSharper disable CommentTypo
 // ReSharper disable StringLiteralTypo
+// ReSharper disable CppClangTidyPerformanceInefficientStringConcatenation
 #include <iostream>
 #include <stack>
 
 using namespace std;
 
+/// <summary>
+/// Checks whether a string contains a specified character at least once within it.
+///	This exists because the C++ "find" function does not work reliably.
+/// </summary>
+/// <param name="string_to_check"></param>
+/// <param name="character_to_find"></param>
+/// <returns></returns>
 bool contains_character(string string_to_check, char character_to_find){
 	for(unsigned int i = 0; i < string_to_check.length(); i++){
 		if(string_to_check[i] == character_to_find){
@@ -25,7 +33,7 @@ bool contains_character(string string_to_check, char character_to_find){
 /// <returns></returns>
 string put_stack_into_string(stack<char>* stack_to_convert){
 	stack<char>* temporary_stack = new stack<char>();
-	string       resulting_string;
+	string resulting_string;
 
 	while(!stack_to_convert->empty()){
 		temporary_stack->push(stack_to_convert->top());
@@ -48,10 +56,7 @@ string put_stack_into_string(stack<char>* stack_to_convert){
 /// <param name="location_2"></param>
 /// <param name="location_3"></param>
 /// <param name="extra_message"></param>
-void print_current_state(stack<char>* location_1, stack<char>* location_2, stack<char>* location_3, const string& extra_message){
-	cout << "\n\n\n";
-	cout << extra_message;
-
+void print_current_state(stack<char>* location_1, stack<char>* location_2, stack<char>* location_3){
 	cout << "\n\nLocation 1: ";
 	cout << put_stack_into_string(location_1);
 
@@ -60,6 +65,8 @@ void print_current_state(stack<char>* location_1, stack<char>* location_2, stack
 
 	cout << "\nLocation 3: ";
 	cout << put_stack_into_string(location_3);
+
+	cout << "\n";
 }
 
 /// <summary>
@@ -69,8 +76,11 @@ void print_current_state(stack<char>* location_1, stack<char>* location_2, stack
 /// <param name="location_to_move_from"></param>
 /// <param name="location_to_move_to"></param>
 /// <param name="number_of_items_to_move"></param>
-void move_items_from_location_to_location(stack<char>* location_to_move_from, stack<char>* location_to_move_to, const unsigned char number_of_items_to_move){
+/// <param name="move_from_name"></param>
+/// <param name="move_to_name"></param>
+void move_items_from_location_to_location(stack<char>* location_to_move_from, stack<char>* location_to_move_to, const unsigned int number_of_items_to_move, const string& move_from_name, const string& move_to_name){
 	for(unsigned int i = 0; i < number_of_items_to_move; i++){
+		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ".";
 		location_to_move_to->push(location_to_move_from->top());
 		location_to_move_from->pop();
 	}
@@ -84,15 +94,21 @@ void move_items_from_location_to_location(stack<char>* location_to_move_from, st
 /// <param name="location_to_move_from"></param>
 /// <param name="location_to_use_as_buffer"></param>
 /// <param name="location_end"></param>
-void complete_location_from_location_using_location_as_buffer(stack<char>* location_to_complete, stack<char>* location_to_move_from, stack<char>* location_to_use_as_buffer, const string& location_end){
+/// <param name="move_to_complete_name"></param>
+/// <param name="move_from_name"></param>
+/// <param name="move_to_buffer_name"></param>
+void complete_location_from_location_using_location_as_buffer(stack<char>* location_to_complete, stack<char>* location_to_move_from, stack<char>* location_to_use_as_buffer, const string& location_end, const string& move_to_complete_name,
+                                                              const string& move_from_name, const string& move_to_buffer_name){
 
 	for(unsigned int i = 0; i < location_end.length(); i++){
 		unsigned int number_of_items_put_into_buffer = 0;
 		while(!location_to_move_from->empty()){
 			if(location_to_move_from->top() == location_end[i]){
+				cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_complete_name + ".";
 				location_to_complete->push(location_to_move_from->top());
 			}
 			else{
+				cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_buffer_name + ".";
 				location_to_use_as_buffer->push(location_to_move_from->top());
 				number_of_items_put_into_buffer++;
 			}
@@ -100,7 +116,7 @@ void complete_location_from_location_using_location_as_buffer(stack<char>* locat
 			location_to_move_from->pop();
 		}
 
-		move_items_from_location_to_location(location_to_use_as_buffer, location_to_move_from, number_of_items_put_into_buffer); // Move the items back from buffer so buffer is reverted to original state.
+		move_items_from_location_to_location(location_to_use_as_buffer, location_to_move_from, number_of_items_put_into_buffer, move_to_buffer_name, move_from_name); // Move the items back from buffer so buffer is reverted to original state.
 	}
 }
 
@@ -110,14 +126,19 @@ void complete_location_from_location_using_location_as_buffer(stack<char>* locat
 /// <param name="location_to_move_to"></param>
 /// <param name="location_to_move_from"></param>
 /// <param name="other_location_to_move_from"></param>
+/// <param name="move_to_name"></param>
+/// <param name="move_from_name"></param>
+/// <param name="other_move_from_name"></param>
 void move_all_to_location_from_other_locations(stack<char>* location_to_move_to, stack<char>* location_to_move_from,
-                                               stack<char>* other_location_to_move_from){
+                                               stack<char>* other_location_to_move_from, const string& move_to_name, const string& move_from_name, const string& other_move_from_name){
 	while(!location_to_move_from->empty()){
+		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ".";
 		location_to_move_to->push(location_to_move_from->top());
 		location_to_move_from->pop();
 	}
 
 	while(!other_location_to_move_from->empty()){
+		cout << "\nMove \'" + string(1, other_location_to_move_from->top()) + "\' from " + move_from_name + " to " + other_move_from_name + ".";
 		location_to_move_to->push(other_location_to_move_from->top());
 		other_location_to_move_from->pop();
 	}
@@ -128,8 +149,11 @@ void move_all_to_location_from_other_locations(stack<char>* location_to_move_to,
 /// </summary>
 /// <param name="location_to_move_from"></param>
 /// <param name="location_to_move_to"></param>
-void move_location_to_location(stack<char>* location_to_move_from, stack<char>* location_to_move_to){
+/// <param name="move_from_name"></param>
+/// <param name="move_to_name"></param>
+void move_location_to_location(stack<char>* location_to_move_from, stack<char>* location_to_move_to, const string& move_from_name, const string& move_to_name){
 	while(!location_to_move_from->empty()){
+		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ".";
 		location_to_move_to->push(location_to_move_from->top());
 		location_to_move_from->pop();
 	}
@@ -202,9 +226,9 @@ int main() // NOLINT(bugprone-exception-escape)
 
 		// Check that every element at start is also in the ending locations, and vice versa.
 		{
-			string combined_start  = location_1_start + location_2_start + location_3_start;
+			string combined_start = location_1_start + location_2_start + location_3_start;
 			string combined_ending = location_1_end + location_2_end + location_3_end;
-			bool   is_valid        = true;
+			bool is_valid = true;
 			for(unsigned int i = 0; i < combined_start.length() && is_valid; i++){
 				if(!contains_character(combined_ending, combined_start[i])){
 					cout << "\n\n-----------------------------ERROR------------------------------\n";
@@ -248,27 +272,29 @@ int main() // NOLINT(bugprone-exception-escape)
 
 		// Perform algorithm
 		// First we move everything from location 2 and location 3 to location 1. Locations 2 and 3 will be empty.
-		move_all_to_location_from_other_locations(location_1, location_2, location_3);
-		print_current_state(location_1, location_2, location_3, "First we move everything from location 2 and location 3 to location 1. Locations 2 and 3 will be empty.");
+		cout << "\n\nFirst we move everything from location 2 and location 3 to location 1. Locations 2 and 3 will be empty.";
+		move_all_to_location_from_other_locations(location_1, location_2, location_3, "Location 1", "Location 2", "Location 3");
+		print_current_state(location_1, location_2, location_3);
 
 		// Now we "complete" location 3 by popping items from location 1 (which has all the items). Invalid items are temporarily held in location 2. At the end, buffer is moved back to location 1, so location 2 will still be empty at the end.
-		complete_location_from_location_using_location_as_buffer(location_3, location_1, location_2, location_3_end);
-		print_current_state(location_1, location_2, location_3,
-		                    "Now we \"complete\" location 3 by popping items from location 1 (which has all the items). Invalid items are temporarily held in location 2. At the end, buffer is moved back to location 1, so location 2 will still be empty at the end.");
+		cout << "\nNow we \"complete\" location 3 by popping items from location 1 (which has all the items). Invalid items are temporarily held in location 2. At the end, buffer is moved back to location 1, so location 2 will still be empty at the end.";
+		complete_location_from_location_using_location_as_buffer(location_3, location_1, location_2, location_3_end, "Location 3", "Location 1", "Location 2");
+		print_current_state(location_1, location_2, location_3);
 
 		// Now we complete location 2 from location 1 similar to above, but we use location 3 as a buffer. It'll just stack on top of items already in location 3, but they'll be put back in location 1 at the end.
-		complete_location_from_location_using_location_as_buffer(location_2, location_1, location_3, location_2_end);
-		print_current_state(location_1, location_2, location_3,
-		                    "Now we complete location 2 from location 1 similar to above, but we use location 3 as a buffer. It'll just stack on top of items already in location 3, but they'll be put back in location 1 at the end.");
+		cout << "\nNow we complete location 2 from location 1 similar to above, but we use location 3 as a buffer. It'll just stack on top of items already in location 3, but they'll be put back in location 1 at the end.";
+		complete_location_from_location_using_location_as_buffer(location_2, location_1, location_3, location_2_end, "Location 2", "Location 1", "Location 3");
+		print_current_state(location_1, location_2, location_3);
 
 		// Since we need to solve location 1, we will move all items from location 1 to location 3 (on top of pre-existing items).
-		move_location_to_location(location_1, location_3);
-		print_current_state(location_1, location_2, location_3, "Since we need to solve location 1, we will move all items from location 1 to location 3 (on top of pre-existing items).");
+		cout << "\nSince we need to solve location 1, we will move all items from location 1 to location 3 (on top of pre-existing items).";
+		move_location_to_location(location_1, location_3, "Location 1", "Location 3");
+		print_current_state(location_1, location_2, location_3);
 
 		// Now we can complete location 1 using the extra items left on location 3 using location 2 as a buffer. Keep in mind the function shouldn't remove extra items since it will revert the buffer and from locations every time a match is found.
-		complete_location_from_location_using_location_as_buffer(location_1, location_3, location_2, location_1_end);
-		print_current_state(location_1, location_2, location_3,
-		                    "Now we can complete location 1 using the extra items left on location 3 using location 2 as a buffer. Keep in mind the function shouldn't remove extra items since it will revert the buffer and from locations every time a match is found.");
+		cout << "\nNow we can complete location 1 using the extra items left on location 3 using location 2 as a buffer. Keep in mind the function shouldn't remove extra items since it will revert the buffer after reaching the end of the stack.";
+		complete_location_from_location_using_location_as_buffer(location_1, location_3, location_2, location_1_end, "Location 1", "Location 3", "Location 2");
+		print_current_state(location_1, location_2, location_3);
 
 		cout << "\n\n\n";
 	}
