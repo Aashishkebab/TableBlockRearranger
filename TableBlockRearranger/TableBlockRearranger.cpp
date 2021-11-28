@@ -80,7 +80,8 @@ void print_current_state(stack<char>* location_1, stack<char>* location_2, stack
 /// <param name="move_to_name"></param>
 void move_items_from_location_to_location(stack<char>* location_to_move_from, stack<char>* location_to_move_to, const unsigned int number_of_items_to_move, const string& move_from_name, const string& move_to_name){
 	for(unsigned int i = 0; i < number_of_items_to_move; i++){
-		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ".";
+		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ": ";
+		cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + move_to_name + ")";
 		location_to_move_to->push(location_to_move_from->top());
 		location_to_move_from->pop();
 	}
@@ -104,11 +105,13 @@ void complete_location_from_location_using_location_as_buffer(stack<char>* locat
 		unsigned int number_of_items_put_into_buffer = 0;
 		while(!location_to_move_from->empty()){
 			if(location_to_move_from->top() == location_end[i]){
-				cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_complete_name + ".";
+				cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_complete_name + ": ";
+				cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_from_name + "), PUT-DOWN(" + move_to_complete_name + ")";
 				location_to_complete->push(location_to_move_from->top());
 			}
 			else{
 				cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_buffer_name + ".";
+				cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_from_name + "), PUT-DOWN(" + move_to_buffer_name + ")";
 				location_to_use_as_buffer->push(location_to_move_from->top());
 				number_of_items_put_into_buffer++;
 			}
@@ -133,12 +136,14 @@ void move_all_to_location_from_other_locations(stack<char>* location_to_move_to,
                                                stack<char>* other_location_to_move_from, const string& move_to_name, const string& move_from_name, const string& other_move_from_name){
 	while(!location_to_move_from->empty()){
 		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ".";
+		cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + move_to_name + ")";
 		location_to_move_to->push(location_to_move_from->top());
 		location_to_move_from->pop();
 	}
 
 	while(!other_location_to_move_from->empty()){
 		cout << "\nMove \'" + string(1, other_location_to_move_from->top()) + "\' from " + move_from_name + " to " + other_move_from_name + ".";
+		cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + other_move_from_name + ")";
 		location_to_move_to->push(other_location_to_move_from->top());
 		other_location_to_move_from->pop();
 	}
@@ -154,6 +159,7 @@ void move_all_to_location_from_other_locations(stack<char>* location_to_move_to,
 void move_location_to_location(stack<char>* location_to_move_from, stack<char>* location_to_move_to, const string& move_from_name, const string& move_to_name){
 	while(!location_to_move_from->empty()){
 		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ".";
+		cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + move_to_name + ")";
 		location_to_move_to->push(location_to_move_from->top());
 		location_to_move_from->pop();
 	}
