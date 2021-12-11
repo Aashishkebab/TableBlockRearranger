@@ -9,6 +9,11 @@
 
 using namespace std;
 
+// The current state of each location, as a stack data type (for pushing and popping)
+stack<char>* location_1;
+stack<char>* location_2;
+stack<char>* location_3;
+
 /// <summary>
 /// Checks whether a string contains a specified character at least once within it.
 ///	This exists because the C++ "find" function does not work reliably.
@@ -50,12 +55,11 @@ string put_stack_into_string(stack<char>* stack_to_convert){
 }
 
 /// <summary>
-/// Prints the current state to the console, with an extra message displayed before.
+/// Prints the current state to the console.
 /// </summary>
 /// <param name="location_1"></param>
 /// <param name="location_2"></param>
 /// <param name="location_3"></param>
-/// <param name="extra_message"></param>
 void print_current_state(stack<char>* location_1, stack<char>* location_2, stack<char>* location_3){
 	cout << "\n\nLocation 1: ";
 	cout << put_stack_into_string(location_1);
@@ -81,9 +85,10 @@ void print_current_state(stack<char>* location_1, stack<char>* location_2, stack
 void move_items_from_location_to_location(stack<char>* location_to_move_from, stack<char>* location_to_move_to, const unsigned int number_of_items_to_move, const string& move_from_name, const string& move_to_name){
 	for(unsigned int i = 0; i < number_of_items_to_move; i++){
 		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ": ";
-		cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + move_to_name + ")";
+		cout << "MOVE(" + move_from_name + "), PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + move_to_name + ")";
 		location_to_move_to->push(location_to_move_from->top());
 		location_to_move_from->pop();
+		print_current_state(location_1, location_2, location_3);
 	}
 }
 
@@ -106,19 +111,20 @@ void complete_location_from_location_using_location_as_buffer(stack<char>* locat
 		while(!location_to_move_from->empty()){
 			if(location_to_move_from->top() == location_end[i]){
 				cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_complete_name + ": ";
-				cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_from_name + "), PUT-DOWN(" + move_to_complete_name + ")";
+				cout << "MOVE(" + move_from_name + "), PICK-UP(" + move_from_name + "), MOVE(" + move_to_complete_name + "), PUT-DOWN(" + move_to_complete_name + ")";
 				location_to_complete->push(location_to_move_from->top());
 			}
 			else{
-				cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_buffer_name + ".";
-				cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_from_name + "), PUT-DOWN(" + move_to_buffer_name + ")";
+				cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_buffer_name + ": ";
+				cout << "MOVE(" + move_from_name + "), PICK-UP(" + move_from_name + "), MOVE(" + move_to_buffer_name + "), PUT-DOWN(" + move_to_buffer_name + ")";
 				location_to_use_as_buffer->push(location_to_move_from->top());
 				number_of_items_put_into_buffer++;
 			}
 
 			location_to_move_from->pop();
+			print_current_state(location_1, location_2, location_3);
 		}
-
+		cout << "\nMove everything back.";
 		move_items_from_location_to_location(location_to_use_as_buffer, location_to_move_from, number_of_items_put_into_buffer, move_to_buffer_name, move_from_name); // Move the items back from buffer so buffer is reverted to original state.
 	}
 }
@@ -135,17 +141,19 @@ void complete_location_from_location_using_location_as_buffer(stack<char>* locat
 void move_all_to_location_from_other_locations(stack<char>* location_to_move_to, stack<char>* location_to_move_from,
                                                stack<char>* other_location_to_move_from, const string& move_to_name, const string& move_from_name, const string& other_move_from_name){
 	while(!location_to_move_from->empty()){
-		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ".";
-		cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + move_to_name + ")";
+		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ": ";
+		cout << "MOVE(" + move_from_name + "), PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + move_to_name + ")";
 		location_to_move_to->push(location_to_move_from->top());
 		location_to_move_from->pop();
+		print_current_state(location_1, location_2, location_3);
 	}
 
 	while(!other_location_to_move_from->empty()){
-		cout << "\nMove \'" + string(1, other_location_to_move_from->top()) + "\' from " + move_from_name + " to " + other_move_from_name + ".";
-		cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + other_move_from_name + ")";
+		cout << "\nMove \'" + string(1, other_location_to_move_from->top()) + "\' from " + move_from_name + " to " + other_move_from_name + ": ";
+		cout << "MOVE(" + move_from_name + "), PICK-UP(" + move_from_name + "), MOVE(" + other_move_from_name + "), PUT-DOWN(" + other_move_from_name + ")";
 		location_to_move_to->push(other_location_to_move_from->top());
 		other_location_to_move_from->pop();
+		print_current_state(location_1, location_2, location_3);
 	}
 }
 
@@ -158,10 +166,11 @@ void move_all_to_location_from_other_locations(stack<char>* location_to_move_to,
 /// <param name="move_to_name"></param>
 void move_location_to_location(stack<char>* location_to_move_from, stack<char>* location_to_move_to, const string& move_from_name, const string& move_to_name){
 	while(!location_to_move_from->empty()){
-		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ".";
-		cout << "PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + move_to_name + ")";
+		cout << "\nMove \'" + string(1, location_to_move_from->top()) + "\' from " + move_from_name + " to " + move_to_name + ": ";
+		cout << "MOVE(" + move_from_name + "), PICK-UP(" + move_from_name + "), MOVE(" + move_to_name + "), PUT-DOWN(" + move_to_name + ")";
 		location_to_move_to->push(location_to_move_from->top());
 		location_to_move_from->pop();
+		print_current_state(location_1, location_2, location_3);
 	}
 }
 
@@ -261,9 +270,11 @@ int main() // NOLINT(bugprone-exception-escape)
 		}
 
 		// The current state of each location, as a stack data type (for pushing and popping)
-		stack<char>* location_1 = new stack<char>();
-		stack<char>* location_2 = new stack<char>();
-		stack<char>* location_3 = new stack<char>();
+		location_1 = new stack<char>();
+		location_2 = new stack<char>();
+		location_3 = new stack<char>();
+
+		// I am aware this causes a memory leak, but I do not care
 
 		// Push string characters onto their respective stacks. Now we're set.
 		for(unsigned int i = 0; i < location_1_start.length(); i++){
@@ -283,7 +294,8 @@ int main() // NOLINT(bugprone-exception-escape)
 		print_current_state(location_1, location_2, location_3);
 
 		// Now we "complete" location 3 by popping items from location 1 (which has all the items). Invalid items are temporarily held in location 2. At the end, buffer is moved back to location 1, so location 2 will still be empty at the end.
-		cout << "\nNow we \"complete\" location 3 by popping items from location 1 (which has all the items). Invalid items are temporarily held in location 2. At the end, buffer is moved back to location 1, so location 2 will still be empty at the end.";
+		cout <<
+			"\nNow we \"complete\" location 3 by popping items from location 1 (which has all the items). Invalid items are temporarily held in location 2. At the end, buffer is moved back to location 1, so location 2 will still be empty at the end.";
 		complete_location_from_location_using_location_as_buffer(location_3, location_1, location_2, location_3_end, "Location 3", "Location 1", "Location 2");
 		print_current_state(location_1, location_2, location_3);
 
@@ -300,6 +312,7 @@ int main() // NOLINT(bugprone-exception-escape)
 		// Now we can complete location 1 using the extra items left on location 3 using location 2 as a buffer. Keep in mind the function shouldn't remove extra items since it will revert the buffer and from locations every time a match is found.
 		cout << "\nNow we can complete location 1 using the extra items left on location 3 using location 2 as a buffer. Keep in mind the function shouldn't remove extra items since it will revert the buffer after reaching the end of the stack.";
 		complete_location_from_location_using_location_as_buffer(location_1, location_3, location_2, location_1_end, "Location 1", "Location 3", "Location 2");
+		cout << "\n\nHere are the final results:";
 		print_current_state(location_1, location_2, location_3);
 
 		cout << "\n\n\n";
